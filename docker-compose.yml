@@ -1,0 +1,41 @@
+version: '3.8'
+services:
+  php:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: ts-react-php
+    environment:
+      - APP_ENV=${APP_ENV}
+      - CONTAINER_ROLE=app
+      - DB_HOST=postgres
+      - DB_PORT=5432
+      - DB_DATABASE=ts_react
+      - DB_USERNAME=root
+      - DB_PASSWORD=root
+    working_dir: /var/www
+    volumes:
+      - .:/var/www
+    ports:
+      - "8000:8000"
+      - "5173:5173"  # Expose Vite port
+    depends_on:
+      - postgres
+    networks:
+      - my_network
+
+  postgres:
+    image: postgres:latest
+    container_name: my_postgres_container
+    environment:
+      POSTGRES_USER: root
+      POSTGRES_PASSWORD: root
+      POSTGRES_DB: ts_react
+    ports:
+      - "5432:5432"
+    networks:
+      - my_network
+
+networks:
+  my_network:
+    driver: bridge

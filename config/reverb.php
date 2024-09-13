@@ -32,6 +32,7 @@ return [
             'host' => env('REVERB_SERVER_HOST', '0.0.0.0'),
             'port' => env('REVERB_SERVER_PORT', 8080),
             'hostname' => env('REVERB_HOST'),
+            'scheme' => env('REVERB_SCHEME', 'wss'),
             'options' => [
                 'tls' => [],
             ],
