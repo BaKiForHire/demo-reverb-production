@@ -2,8 +2,11 @@
 
 namespace App\Http\Controllers;
 
+use App\Events\BidPlaced;
+use App\Jobs\EmitBidEvent;
 use App\Models\Bid;
 use App\Models\Auction;
+use App\Models\User;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 
@@ -14,7 +17,52 @@ use Illuminate\Support\Facades\Auth;
 class BidController extends Controller
 {
     /**
-     * Place a new bid on an auction.
+     * Centralized method to place a bid
+     */
+    public function placeBid($auctionId, $amount, $userId)
+    {
+        $user = Auth::user();
+
+        // // Find the auction
+        $auction = Auction::find($auctionId);
+        if (!$auction) {
+            return response()->json(['error' => 'Auction not found.'], 404);
+        }
+
+        // Ensure the auction is active
+        if ($auction->status !== 'active') {
+            return response()->json(['error' => 'The auction is not active.'], 400);
+        }
+
+        // Ensure the bid is higher than the current price
+        if ($amount <= $auction->current_price) {
+            return response()->json(['error' => 'Bid amount must be higher than the current price.'], 400);
+        }
+
+        // Create the bid
+        $bid = Bid::create([
+            'auction_id' => $auction->id,
+            'user_id' => $user->id,
+            'amount' => $amount,
+        ]);
+
+        // Update auction's current price
+        $auction->current_price = $amount;
+
+        // Extend grace period if applicable
+        $auction->extendGracePeriod();
+        $auction->save();
+
+        // Dispatch the job to handle the event emission
+        // EmitBidEvent::dispatch($bid);
+        event(new BidPlaced($bid));
+
+        // return ['auction' => $auction, 'bid' => $bid];
+        return response()->json(['message' => 'We are now here.', 'user' => $user, 'auction' => $auction, 'bid' => $bid], 201);
+    }
+
+    /**
+     * HTTP API Endpoint for placing a bid.
      */
     public function store(Request $request)
     {
@@ -23,33 +71,11 @@ class BidController extends Controller
             'amount' => 'required|numeric|min:0',
         ]);
 
-        $auction = Auction::findOrFail($request->auction_id);
+        $auctionId = $request->auction_id;
+        $amount = $request->amount;
+        $userId = Auth::id();
 
-        // Authorization check
-        $this->authorize('create', [Bid::class, $auction]);
-
-        // Ensure auction is active and bid amount is valid
-        if ($auction->status !== 'active') {
-            return response()->json(['error' => 'Auction is not active.'], 400);
-        }
-
-        if ($request->amount <= $auction->current_price) {
-            return response()->json(['error' => 'Bid amount must be higher than the current price.'], 400);
-        }
-
-        $user = Auth::user();
-
-        $bid = Bid::create([
-            'auction_id' => $request->auction_id,
-            'user_id' => $user->id,
-            'amount' => $request->amount,
-        ]);
-
-        // Update auction's current price
-        $auction->current_price = $request->amount;
-        $auction->save();
-
-        return response()->json(['message' => 'Bid placed successfully.', 'bid' => $bid]);
+        return $this->placeBid($auctionId, $amount, $userId);
     }
 
     /**

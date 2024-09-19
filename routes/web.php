@@ -13,34 +13,11 @@ use Inertia\Inertia;
 
 // Welcome page
 Route::get('/', function () {
+    $auctions = Auction::with('categories', 'bids')->limit(12)->get();
+
     return Inertia::render('Welcome', [
-        'canLogin' => Route::has('login'),
-        'canRegister' => Route::has('register'),
-        'laravelVersion' => Application::VERSION,
-        'phpVersion' => PHP_VERSION,
+        'latestAuctions' => $auctions,
     ]);
-});
-
-Route::post('/place-bid', function () {
-    $auction = $auction = Auction::with('media')->find(1); // Get the first auction for simplicity
-
-    // Create a new Bid model and save it to the database
-    $bid = Bid::create([
-        'auction_id' => $auction->id,
-        'user_id' => 1, // Dummy user ID
-        'amount' => $auction->current_price ? $auction->current_price + 100 : $auction->start_price, // Incremental bid amount
-        'created_at' => now(),
-        'updated_at' => now(),
-    ]);
-
-    $auction->current_price = $bid->amount;
-
-    $auction->save();
-
-    // Emit the bid placed event with a real Bid model instance
-    event(new BidPlaced($bid));
-    
-    return response()->json($bid);
 });
 
 // Dashboard - Requires authentication

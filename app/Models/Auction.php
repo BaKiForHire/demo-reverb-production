@@ -3,6 +3,7 @@
 namespace App\Models;
 
 use App\Events\AuctionGracePeriodExtended;
+use Carbon\Carbon;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 
@@ -25,7 +26,13 @@ class Auction extends Model
         'payment_status',
         'payout_status',
         'has_shipping_proof',
-        'shipping_proof_url'
+        'shipping_proof_url',
+        'grace_extension_count'
+    ];
+
+    protected $casts = [
+        'start_time' => 'datetime',
+        'end_time' => 'datetime',
     ];
 
     /**
@@ -101,17 +108,31 @@ class Auction extends Model
     }
 
     /**
-     * Extend the grace period of the auction by 2 minutes
+     * Extend the grace period of the auction if necessary.
      */
     public function extendGracePeriod()
     {
-        // Check if the bid is placed within the last 2 minutes of the auction
-        if (now()->diffInMinutes($this->end_time, false) <= 2) {
-            $this->end_time = $this->end_time->addMinutes(2);
-            $this->grace_count += 1;
+        // Get the current time
+        $now = Carbon::now();
+        
+        // Calculate the time remaining in seconds
+        $timeRemaining = $this->end_time->diffInSeconds($now, false);
+
+        // If the time remaining is less than 120 seconds and greater than 0 (auction is still running)
+        if ($timeRemaining > 0 && $timeRemaining < 120) {
+            // Calculate how many seconds need to be added to make the remaining time 120 seconds
+            $secondsToAdd = 120 - $timeRemaining;
+
+            // Add the required seconds to the auction's end time
+            $this->end_time = $this->end_time->addSeconds($secondsToAdd);
+            
+            // Increment the grace period extension count
+            $this->grace_extension_count += 1;
+            
+            // Save the changes
             $this->save();
 
-            // Emit a WebSocket event to notify all connected clients
+            // Emit an event to notify clients of the grace period extension
             event(new AuctionGracePeriodExtended($this));
         }
     }

@@ -1,5 +1,6 @@
 <?php
 
+use App\Http\Controllers\API\V1\BidAPIController;
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\UserController;
 use App\Http\Controllers\AuctionController;
@@ -13,6 +14,12 @@ use App\Http\Controllers\NewsletterSubscriptionController;
 
 // API v1 Routes - Prefixed with 'api/v1/'
 Route::prefix('v1')->group(function () {
+
+    // Testing route
+    Route::post('/test-no-auth', [BidAPIController::class, 'index']);
+    Route::middleware('auth:sanctum')->group(function () {
+        Route::post('/test-auth', [BidAPIController::class, 'store']);
+    });
 
     // User routes - Authentication and user management
     Route::middleware('auth:api')->group(function () {
@@ -39,6 +46,7 @@ Route::prefix('v1')->group(function () {
     Route::middleware('auth:api')->group(function () {
         Route::post('/bids', [BidController::class, 'store']);
         Route::get('/auctions/{auctionId}/bids', [BidController::class, 'index']);
+        Route::post('/auction/{id}/place-bid', [BidController::class, 'store']);
     });
 
     // Tier routes - Managing user tiers

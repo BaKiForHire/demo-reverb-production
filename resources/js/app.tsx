@@ -18,4 +18,9 @@ createInertiaApp({
     progress: {
         color: '#4B5563',
     },
+}).then(() => {
+    /**
+     * Remove the data-page attribute from the app element after the page component is loaded.
+     */
+    document.getElementById('app')?.removeAttribute('data-page');
 });

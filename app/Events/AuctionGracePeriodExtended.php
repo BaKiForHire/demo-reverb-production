@@ -5,12 +5,11 @@ namespace App\Events;
 use App\Models\Auction;
 use Illuminate\Broadcasting\Channel;
 use Illuminate\Broadcasting\InteractsWithSockets;
-use Illuminate\Broadcasting\PrivateChannel;
-use Illuminate\Contracts\Broadcasting\ShouldBroadcast;
+use Illuminate\Contracts\Broadcasting\ShouldBroadcastNow;
 use Illuminate\Foundation\Events\Dispatchable;
 use Illuminate\Queue\SerializesModels;
 
-class AuctionGracePeriodExtended implements ShouldBroadcast
+class AuctionGracePeriodExtended implements ShouldBroadcastNow
 {
     use Dispatchable, InteractsWithSockets, SerializesModels;
 
@@ -21,7 +20,6 @@ class AuctionGracePeriodExtended implements ShouldBroadcast
         $this->auction = $auction;
     }
 
-    // Dont add +2 minutes, reset deadline to be at exactly 2 minutes before end.
     public function broadcastOn()
     {
         return new Channel('auctions.' . $this->auction->id);
