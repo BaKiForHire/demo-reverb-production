@@ -23,6 +23,11 @@ class VerifyCsrfToken extends Middleware
      */
     protected function tokensMatch($request)
     {
+        // Skip CSRF check for HTTP (non-secure) requests
+        if (!$request->secure()) {
+          return true;
+        }
+      
         // If running unit tests, don't enforce CSRF token match
         if (app()->runningUnitTests()) {
             return true;

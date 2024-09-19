@@ -3,14 +3,20 @@ import { PageProps } from '@/types';
 import { useState, useEffect } from 'react';
 import axios from 'axios';
 
-export default function Welcome({ auth, laravelVersion, phpVersion }: PageProps<{ laravelVersion: string, phpVersion: string }>) {
+export default function Welcome({ auth, laravelVersion, phpVersion, csrfToken }: PageProps<{ laravelVersion: string, phpVersion: string, csrfToken: string }>) {
     const [bidSocketData, setBidSocketData] = useState("woosh");
     const [responseData, setResponseData] = useState(null);
 
     // Handle button click to place a bid
     const handlePlaceBid = async () => {
         try {
-            const response = await axios.post('/place-bid');
+            const response = await axios.post('/place-bid', {
+                // Any form data can be passed here if needed
+            }, {
+                headers: {
+                    'X-CSRF-TOKEN': csrfToken, // Pass the CSRF token with the request
+                }
+            });
             console.log('[POST CALL] Response:', response.data);
             setResponseData(response.data);
         } catch (error) {
@@ -58,7 +64,6 @@ export default function Welcome({ auth, laravelVersion, phpVersion }: PageProps<
                 <h2>POST API Response Data:</h2>
                 <pre>{JSON.stringify(responseData, null, 2)}</pre>
             </div>
-
 
             <div className="mt-4">
                 <h2>New Bid Event(Socket) Data:</h2>
