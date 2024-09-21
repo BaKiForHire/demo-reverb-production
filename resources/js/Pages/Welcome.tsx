@@ -19,7 +19,7 @@ type Auction = {
 };
 
 const apiClient = axios.create({
-    baseURL: 'http://localhost:8000', // Adjust the base URL as necessary
+    baseURL: `${import.meta.env.VITE_APP_ENV === 'local' ? `${import.meta.env.VITE_APP_URL}:8000` : import.meta.env.VITE_APP_URL}`, // Adjust the base URL as necessary
     withCredentials: true,            // This ensures that cookies are sent with the request
 });
 
