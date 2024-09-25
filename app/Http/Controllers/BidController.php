@@ -54,8 +54,12 @@ class BidController extends Controller
         $auction->save();
 
         // Dispatch the job to handle the event emission
-        // EmitBidEvent::dispatch($bid);
-        event(new BidPlaced($bid));
+        EmitBidEvent::dispatch($bid);
+        try {
+          event(new BidPlaced($bid));
+        } catch (Illuminate\Broadcasting\BroadcastException $e) {
+          return response()->json(['message' => 'Fell in catch...'], 203);
+        }
 
         // return ['auction' => $auction, 'bid' => $bid];
         return response()->json(['message' => 'We are now here.', 'user' => $user, 'auction' => $auction, 'bid' => $bid], 201);

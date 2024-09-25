@@ -13,7 +13,7 @@ use Inertia\Inertia;
 
 // Welcome page
 Route::get('/', function () {
-    $auctions = Auction::with('categories', 'bids')->limit(12)->get();
+    $auctions = Auction::with('categories', 'bids')->whereBetween('id', [1, 12])->get();
 
     return Inertia::render('Welcome', [
         'latestAuctions' => $auctions,
