@@ -36,10 +36,10 @@ return [
             'secret' => env('REVERB_APP_SECRET'),
             'app_id' => env('REVERB_APP_ID'),
             'options' => [
-                'host' => 'mggunauctions.com',
-                'port' => 6001,
-                'scheme' => 'http',
-                'useTLS' => false
+                'host' => env('REVERB_HOST', 'mggunauctions.com'),
+                'port' => env('REVERB_PORT', 6001),
+                'scheme' => env('REVERB_SCHEME', 'http'),
+                'useTLS' => env('REVERB_USE_TLS', false)
             ],
             'client_options' => [
                 // Guzzle client options: https://docs.guzzlephp.org/en/stable/request-options.html
@@ -55,11 +55,11 @@ return [
             'app_id' => env('PUSHER_APP_ID'),
             'options' => [
                 'cluster' => env('PUSHER_APP_CLUSTER'),
-                'host' => 'mggunauctions.com',
-                'port' => 6001,
-                'scheme' => 'http',
-                'encrypted' => false,
-                'useTLS' => false,
+                'host' => env('PUSHER_HOST', 'mggunauctions.com'),
+                'port' => env('PUSHER_PORT', 6001),
+                'scheme' => env('PUSHER_SCHEME', 'http'),
+                'encrypted' => env('PUSHER_ENCRYPTED', false),
+                'useTLS' => env('PUSHER_SCHEME', 'http') === 'https',
             ],
             'client_options' => [
                 // Guzzle client options: https://docs.guzzlephp.org/en/stable/request-options.html

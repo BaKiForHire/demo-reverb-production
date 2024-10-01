@@ -9,14 +9,16 @@ use App\Models\Auction;
 use App\Models\Bid;
 use Illuminate\Foundation\Application;
 use Illuminate\Support\Facades\Route;
+use Illuminate\Support\Facades\Auth;
 use Inertia\Inertia;
 
 // Welcome page
 Route::get('/', function () {
-    $auctions = Auction::with('categories', 'bids')->whereBetween('id', [1, 12])->get();
+    $auctions = Auction::with('categories', 'bids')->whereBetween('id', [0, 11])->get();
 
-    return Inertia::render('Welcome', [
-        'latestAuctions' => $auctions,
+    return Inertia::render('Home/Home', [
+        'auctions' => $auctions,
+        'user' => Auth::user(),
     ]);
 });
 
