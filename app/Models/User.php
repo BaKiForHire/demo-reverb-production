@@ -32,7 +32,15 @@ class User extends Authenticatable
     protected $hidden = [
         'password',
         'remember_token',
+        'location_id',
     ];
+
+    /**
+     * The relationships that should always be loaded.
+     *
+     * @var array
+     */
+    protected $with = ['location'];
 
     /**
      * Get the attributes that should be cast.

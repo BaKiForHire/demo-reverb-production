@@ -3,6 +3,7 @@
 namespace Database\Factories;
 
 use App\Models\Auction;
+use App\Models\Location;
 use App\Models\User;
 use Illuminate\Database\Eloquent\Factories\Factory;
 
@@ -28,8 +29,10 @@ class AuctionFactory extends Factory
             'start_time' => $this->faker->dateTimeBetween('-1 week', '+1 week'),
             'end_time' => $this->faker->dateTimeBetween('+1 week', '+1 month'),
             'user_id' => User::factory(),
+            'location_id' => Location::factory(),
             'status' => 'active',
             'thumbnail_url' => $this->faker->imageUrl(),
+            'hash' => $this->faker->unique()->regexify('[A-Za-z0-9]{10}'),
         ];
     }
 }

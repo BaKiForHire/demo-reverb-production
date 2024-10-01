@@ -27,13 +27,16 @@ class Auction extends Model
         'payout_status',
         'has_shipping_proof',
         'shipping_proof_url',
-        'grace_extension_count'
+        'grace_extension_count',
+        'hash'
     ];
 
     protected $casts = [
         'start_time' => 'datetime',
         'end_time' => 'datetime',
     ];
+
+    protected $appends = ['location', 'media', 'user'];
 
     /**
      * Get the user associated with the Auction
@@ -135,5 +138,29 @@ class Auction extends Model
             // Emit an event to notify clients of the grace period extension
             event(new AuctionGracePeriodExtended($this));
         }
+    }
+
+    /**
+     * Accessor for the location attribute.
+     */
+    public function getLocationAttribute()
+    {
+        return $this->location()->first();
+    }
+
+    /**
+     * Accessor for the media attribute.
+     */
+    public function getMediaAttribute()
+    {
+        return $this->media()->get();
+    }
+
+    /**
+     * Accessor for the user attribute.
+     */
+    public function getUserAttribute()
+    {
+        return $this->user()->first();
     }
 }

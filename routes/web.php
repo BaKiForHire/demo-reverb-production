@@ -8,17 +8,29 @@ use App\Http\Controllers\NotificationController;
 use App\Models\Auction;
 use App\Models\Bid;
 use Illuminate\Foundation\Application;
+use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Route;
 use Inertia\Inertia;
 
 // Welcome page
 Route::get('/', function () {
-    $auctions = Auction::with('categories', 'bids')->limit(12)->get();
+    $auctions = Auction::with('categories', 'bids')->whereBetween('id', [0, 11])->get();
 
-    return Inertia::render('Welcome', [
-        'latestAuctions' => $auctions,
+    return Inertia::render('Home/Index', [
+        'auctions' => $auctions,
+        'user' => Auth::user(),
     ]);
-});
+})->name('home');
+
+// Auction page
+Route::get('/auction/{auctionHash}', function () {
+    $auction = Auction::where('hash', request()->route('auctionHash'))->with('categories', 'bids')->firstOrFail();
+
+    return Inertia::render('Auction/Index', [
+        'auction' => $auction,
+        'user' => Auth::user(),
+    ]);
+})->name('auction');
 
 // Dashboard - Requires authentication
 Route::get('/dashboard', function () {
