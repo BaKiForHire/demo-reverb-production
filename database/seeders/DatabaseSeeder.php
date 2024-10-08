@@ -32,7 +32,7 @@ class DatabaseSeeder extends Seeder
             AuctionSeeder::class,
             BidSeeder::class,
             CommentSeeder::class,
-            AuctionCategorySeeder::class,
+            // AuctionCategorySeeder::class,
             MediaSeeder::class,
             NotificationSeeder::class,
             LocationSeeder::class,
