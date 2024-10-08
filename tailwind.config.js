@@ -12,6 +12,10 @@ export default {
 
     theme: {
         extend: {
+            screens: {
+                'custom-md': '890px', // Custom breakpoint at 890px
+                'custom-sm': '360px', // Custom breakpoint at 320px
+            },
             fontFamily: {
                 sans: ['Figtree', ...defaultTheme.fontFamily.sans],
             },

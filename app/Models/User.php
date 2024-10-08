@@ -2,7 +2,6 @@
 
 namespace App\Models;
 
-// use Illuminate\Contracts\Auth\MustVerifyEmail;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
@@ -40,7 +39,7 @@ class User extends Authenticatable
      *
      * @var array
      */
-    protected $with = ['location'];
+    protected $with = ['location', 'tiers'];
 
     /**
      * Get the attributes that should be cast.
@@ -56,7 +55,9 @@ class User extends Authenticatable
     }
 
     /**
-     * Get all notifications for the user.
+     * Get the notifications for the user.
+     *
+     * @return \Illuminate\Database\Eloquent\Relations\HasMany
      */
     public function notifications()
     {
@@ -64,10 +65,54 @@ class User extends Authenticatable
     }
 
     /**
-     * Get user location.
+     * Get the location that the user belongs to.
+     *
+     * @return \Illuminate\Database\Eloquent\Relations\BelongsTo
      */
     public function location()
     {
         return $this->belongsTo(Location::class);
+    }
+
+    /**
+     * Relationship with tiers.
+     */
+    public function tiers()
+    {
+        return $this->belongsToMany(Tier::class, 'user_tiers')->withPivot('status');
+    }
+
+    /**
+     * Check if the user has a specific tier.
+     *
+     * @param string $tierName
+     * @param string $status (default is 'active')
+     * @return bool
+     */
+    public function hasTier(string $tierName, string $status = 'active'): bool
+    {
+        return $this->tiers()->where('name', $tierName)->wherePivot('status', $status)->exists();
+    }
+
+    /**
+     * Check if the user has any of the specified tiers.
+     *
+     * @param array $tierNames
+     * @param string $status (default is 'active')
+     * @return bool
+     */
+    public function hasAnyTier(array $tierNames, string $status = 'active'): bool
+    {
+        return $this->tiers()->whereIn('name', $tierNames)->wherePivot('status', $status)->exists();
+    }
+
+    /**
+     * Get the tier key values for the user.
+     *
+     * @return \Illuminate\Database\Eloquent\Relations\HasMany
+     */
+    public function tierValues()
+    {
+        return $this->hasMany(UserTierKeyValue::class);
     }
 }

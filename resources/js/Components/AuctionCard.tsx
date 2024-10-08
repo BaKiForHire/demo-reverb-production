@@ -1,5 +1,5 @@
-import { Auction } from '@/types';
-import { Link } from '@inertiajs/react';
+import { Auction, User } from '@/types';
+import { Link, usePage } from '@inertiajs/react';
 import axios from 'axios';
 import dayjs from 'dayjs';
 import duration from 'dayjs/plugin/duration';
@@ -7,11 +7,14 @@ import React, { useEffect, useState } from 'react';
 import { FaRegClock } from 'react-icons/fa';
 import { HiHashtag } from 'react-icons/hi';
 import { IoIosHeart, IoIosHeartEmpty } from 'react-icons/io';
+import { ToastType } from './Toast';
 
 dayjs.extend(duration);
 
 type AuctionCardProps = {
     auction: Auction;
+    width?: string;
+    handleToast?: (title: string, message: string, type: ToastType) => void;
 };
 
 const apiClient = axios.create({
@@ -19,7 +22,8 @@ const apiClient = axios.create({
     withCredentials: true,
 });
 
-const AuctionCard: React.FC<AuctionCardProps> = ({ auction: initialAuction }) => {
+const AuctionCard: React.FC<AuctionCardProps> = ({ auction: initialAuction, width = 'min-w-[calc25%-1rem]', handleToast }) => {
+    const user = usePage().props.user as User;
     const [auction, setAuction] = useState<Auction>({
         ...initialAuction,
         current_price: initialAuction.current_price ?? '0', // Ensure current_price is a string
@@ -30,7 +34,31 @@ const AuctionCard: React.FC<AuctionCardProps> = ({ auction: initialAuction }) =>
     const [isFavorite, setIsFavorite] = useState(auction.favorite);
     const [timeRemaining, setTimeRemaining] = useState('');
 
-    const toggleFavorite = () => {
+    const toggleFavorite = (e) => {
+        e.stopPropagation();
+        e.preventDefault();
+
+        // If user is not authenticated, show a toast message
+        if (!user) {
+            handleToast('Attention', 'You must be logged in to add auctions to your favorites.', ToastType.INFO);
+            return;
+        }
+
+        // Make an API request to toggle the favorite status
+        const apiRoute = (isFavorite ? route('favorite.unset', { auctionHash: auction.hash }) : route('favorite.set', { auctionHash: auction.hash }));
+        apiClient.post(apiRoute)
+            .then((response) => {
+                handleToast('Success', response.data.message, ToastType.SUCCESS);
+                setAuction((prevAuction) => ({
+                    ...prevAuction,
+                    favorite: response.data.favorite,
+                }));
+            })
+            .catch((error) => {
+                handleToast('Error', error.response?.data || error.message, ToastType.ERROR);
+                console.error('Error:', error.response?.data || error.message);
+            });
+
         setIsFavorite((prev) => !prev);
         setAuction((prevAuction) => ({
             ...prevAuction,
@@ -100,7 +128,7 @@ const AuctionCard: React.FC<AuctionCardProps> = ({ auction: initialAuction }) =>
 
     return (
         <Link href={route('auction', { auctionHash: auction.hash})}>
-            <div className="overflow-hidden rounded-3xl border-none border-gray-300 max-w-xs min-w-[calc(25%-1rem)] shadow-md bg-[#f4f4f4] m-2 h-full flex flex-col relative cursor-pointer">
+            <div className={`overflow-hidden rounded-3xl border-none border-gray-300 max-w-xs ${width} shadow-md bg-[#f4f4f4] m-2 h-full flex flex-col relative cursor-pointer`}>
                 <img src={auction.thumbnail_url} alt={auction.title} className="w-full rounded-t-3xl flex-shrink-0" />
 
                 <button onClick={toggleFavorite} className="absolute top-3 right-3 text-2xl text-white font-bold hover:text-red-500 focus:outline-none">

@@ -87,6 +87,15 @@ export default function Login({ status, canResetPassword }: { status?: string, c
                         Log in
                     </PrimaryButton>
                 </div>
+
+                <div className="flex items-center justify-center mt-4 border-t border-gray-200 pt-4">
+                    <Link
+                        href={route('register')}
+                        className="underline text-sm text-gray-600 hover:text-gray-900 rounded-md focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500"
+                    >
+                        Don't have an account?
+                    </Link>
+                </div>
             </form>
         </GuestLayout>
     );

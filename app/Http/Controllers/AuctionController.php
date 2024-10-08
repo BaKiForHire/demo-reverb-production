@@ -2,8 +2,12 @@
 
 namespace App\Http\Controllers;
 
+use App\Enums\AuctionStatus;
 use App\Models\Auction;
 use App\Models\AuctionCategory;
+use App\Models\Bid;
+use App\Models\FavoriteAuction;
+use App\Models\User;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 
@@ -18,7 +22,7 @@ class AuctionController extends Controller
      */
     public function index()
     {
-        $auctions = Auction::where('status', 'active')->get();
+        $auctions = Auction::where('status', AuctionStatus::ACTIVE->value)->get();
         return response()->json($auctions);
     }
 
@@ -161,4 +165,52 @@ class AuctionController extends Controller
         return response()->json(['message' => 'View count updated']);
     }
 
+    public static function getUserBids(User $user)
+    {
+        // Fetch all auctions the user has interacted with (placed a bid on)
+        $auctions = Auction::whereHas('bidsByUser', function ($query) use ($user) {
+            $query->where('user_id', $user->id);
+        })->with(['bidsByUser'])->get();
+
+        $liveAuctions = [];
+        $concludedAuctions = [];
+
+        foreach ($auctions as $auction) {
+            // Check if the auction needs to be concluded based on the end time
+            if (AuctionStatus::isStatus($auction->status, AuctionStatus::ACTIVE) && $auction->end_time < now()) {
+                $auction->conclude();
+            }
+
+            // Create an array with auction and bids details
+            $auctionData = [
+                'id' => $auction->id,
+                'title' => $auction->title,
+                'start_price' => $auction->start_price,
+                'current_price' => $auction->current_price,
+                'end_time' => $auction->end_time,
+                'thumbnail_url' => $auction->thumbnail_url,
+                'status' => $auction->status,
+                'hash' => $auction->hash,
+                'bids' => $auction->bidsByUser->map(function ($bid) {
+                    return [
+                        'id' => $bid->id,
+                        'amount' => $bid->amount,
+                        'created_at' => $bid->created_at,
+                    ];
+                }),
+            ];
+
+            // Separate auctions into live and concluded
+            if (AuctionStatus::isStatus($auction->status, AuctionStatus::ENDED)) {
+                $concludedAuctions[] = $auctionData;
+            } else {
+                $liveAuctions[] = $auctionData;
+            }
+        }
+
+        return [
+            'live' => $liveAuctions,
+            'concluded' => $concludedAuctions,
+        ];
+    }
 }

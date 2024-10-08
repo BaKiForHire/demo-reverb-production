@@ -13,6 +13,15 @@ class TierSeeder extends Seeder
      */
     public function run()
     {
-        Tier::factory(4)->create();
+        // Create the predefined tiers
+        $tiers = [
+            ['name' => 'Buyer', 'description' => 'Can bid/buy on items for sale.'],
+            ['name' => 'Seller', 'description' => 'Can list items for sale.'],
+            ['name' => 'FFL Dealer', 'description' => 'Has additional privileges for bulk uploading and special auctions.'],
+        ];
+
+        foreach ($tiers as $tier) {
+            Tier::factory()->predefined($tier['name'], $tier['description'])->create();
+        }
     }
 }

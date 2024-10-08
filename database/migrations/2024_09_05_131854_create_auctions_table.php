@@ -1,5 +1,6 @@
 <?php
 
+use App\Enums\AuctionStatus;
 use Illuminate\Database\Migrations\Migration;
 use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Support\Facades\Schema;
@@ -20,7 +21,7 @@ return new class extends Migration
             $table->timestamp('start_time');
             $table->timestamp('end_time');
             $table->foreignId('user_id')->constrained()->onDelete('cascade');
-            $table->enum('status', ['active', 'frozen', 'ended']);
+            $table->enum('status', AuctionStatus::values());
             $table->string('media_url')->nullable();  // For storing image/video URL
             $table->timestamps();
         });

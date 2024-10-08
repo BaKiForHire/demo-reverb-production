@@ -15,4 +15,11 @@ class UserTierKey extends Model
     {
         return $this->belongsTo(Tier::class);
     }
+
+    // Relationship with Tier through the tier_key_requirements pivot table
+    public function tiers()
+    {
+        return $this->belongsToMany(Tier::class, 'tier_key_requirements')
+                    ->withPivot('is_required');
+    }
 }

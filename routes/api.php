@@ -10,7 +10,10 @@ use App\Http\Controllers\UserTierKeyController;
 use App\Http\Controllers\NotificationController;
 use App\Http\Controllers\AuctionCategoryController;
 use App\Http\Controllers\CommentController;
+use App\Http\Controllers\FavoriteAuctionController;
 use App\Http\Controllers\NewsletterSubscriptionController;
+use App\Http\Controllers\TierEvaluationController;
+use App\Http\Controllers\UserTierKeyValueController;
 
 // API v1 Routes - Prefixed with 'api/v1/'
 Route::prefix('v1')->group(function () {
@@ -33,13 +36,13 @@ Route::prefix('v1')->group(function () {
 
     // Auction routes - Managing auctions
     Route::middleware('auth:api')->group(function () {
-        Route::get('/auctions', [AuctionController::class, 'index']);
-        Route::post('/auctions', [AuctionController::class, 'store']);
-        Route::get('/auctions/{id}', [AuctionController::class, 'show']);
-        Route::put('/auctions/{id}', [AuctionController::class, 'update']);
-        Route::post('/auctions/{id}/freeze', [AuctionController::class, 'freeze']);
-        Route::delete('/auctions/{id}', [AuctionController::class, 'delete']);
-        Route::post('/auctions/{auctionId}/media', [AuctionController::class, 'storeMedia']);
+        Route::get('/auctions', [AuctionController::class, 'index'])->name('auctions.index');
+        Route::post('/auctions', [AuctionController::class, 'store'])->name('auctions.store');
+        Route::get('/auctions/{id}', [AuctionController::class, 'show'])->name('auctions.show');
+        Route::put('/auctions/{id}', [AuctionController::class, 'update'])->name('auctions.update');
+        Route::post('/auctions/{id}/freeze', [AuctionController::class, 'freeze'])->name('auctions.freeze');
+        Route::delete('/auctions/{id}', [AuctionController::class, 'delete'])->name('auctions.delete');
+        Route::post('/auctions/{auctionId}/media', [AuctionController::class, 'storeMedia'])->name('auctions.storeMedia');
     });
 
     // Bid routes - Placing and managing bids
@@ -47,6 +50,12 @@ Route::prefix('v1')->group(function () {
         Route::post('/bids', [BidController::class, 'store']);
         Route::get('/auctions/{auctionId}/bids', [BidController::class, 'index']);
         Route::post('/auction/{id}/place-bid', [BidController::class, 'store']);
+    });
+
+    // FavoriteAuction routes - Managing favorite auctions
+    Route::middleware('auth:sanctum')->group(function () {
+        Route::post('/favorite/set/{auctionHash}', [FavoriteAuctionController::class, 'set'])->name('favorite.set');
+        Route::post('/favorite/unset/{auctionHash}', [FavoriteAuctionController::class, 'unset'])->name('favorite.unset');
     });
 
     // Tier routes - Managing user tiers
@@ -59,10 +68,15 @@ Route::prefix('v1')->group(function () {
 
     // UserTierKey routes - Managing dynamic keys for user tiers
     Route::middleware('auth:api')->group(function () {
-        Route::get('/tiers/{tierId}/keys', [UserTierKeyController::class, 'index']);
+        Route::get('/tiers/{tierId}/keys', [UserTierKeyController::class, 'index'])->name('tiers.keys');
         Route::post('/tiers/keys', [UserTierKeyController::class, 'store']);
         Route::put('/tiers/keys/{id}', [UserTierKeyController::class, 'update']);
         Route::post('/tiers/keys/{id}/disable', [UserTierKeyController::class, 'disable']);
+
+        // UserTierKeyValue routes - Managing user tier key values
+        Route::post('/tiers/tier-key-values', [UserTierKeyValueController::class, 'storeOrUpdate'])->name('tiers.key-values');
+
+        Route::post('/tiers/tier-evaluation', [TierEvaluationController::class, 'evaluate'])->name('tiers.evaluate');
     });
 
     // Notification routes - Managing notifications

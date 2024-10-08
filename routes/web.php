@@ -4,9 +4,13 @@ use App\Events\BidPlaced;
 use App\Http\Controllers\ProfileController;
 use App\Http\Controllers\AuctionController;
 use App\Http\Controllers\AuctionCategoryController;
+use App\Http\Controllers\FavoriteAuctionController;
 use App\Http\Controllers\NotificationController;
+use App\Http\Controllers\TierController;
 use App\Models\Auction;
 use App\Models\Bid;
+use App\Models\Tier;
+use App\Models\UserTierKey;
 use Illuminate\Foundation\Application;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Route;
@@ -16,17 +20,17 @@ use Inertia\Inertia;
 Route::get('/', function () {
     $auctions = Auction::with('categories', 'bids')->whereBetween('id', [0, 11])->get();
 
-    return Inertia::render('Home/Index', [
+    return Inertia::render('Home/Home', [
         'auctions' => $auctions,
         'user' => Auth::user(),
     ]);
 })->name('home');
 
 // Auction page
-Route::get('/auction/{auctionHash}', function () {
+Route::get('/item/{auctionHash}', function () {
     $auction = Auction::where('hash', request()->route('auctionHash'))->with('categories', 'bids')->firstOrFail();
 
-    return Inertia::render('Auction/Index', [
+    return Inertia::render('Auction/Auction', [
         'auction' => $auction,
         'user' => Auth::user(),
     ]);
@@ -34,8 +38,26 @@ Route::get('/auction/{auctionHash}', function () {
 
 // Dashboard - Requires authentication
 Route::get('/dashboard', function () {
-    return Inertia::render('Dashboard');
+    $user = Auth::user();
+
+    if (!$user) {
+        return redirect()->route('login');
+    }
+
+    // Load user tiers and auctions
+    $tierDetails = TierController::getUserTierDetails($user);
+    $favorites = FavoriteAuctionController::getUserFavorites($user);
+    $bids = AuctionController::getUserBids($user);
+
+    return Inertia::render('Dashboard/Dashboard', [
+        'user' => $user,
+        'tierDetails' => $tierDetails['tiersWithDetails'],
+        'availableTiers' => $tierDetails['availableTiers'],
+        'favorites' => $favorites,
+        'bids' => $bids,
+    ]);
 })->middleware(['auth', 'verified'])->name('dashboard');
+
 
 // Profile routes - Requires authentication
 Route::middleware('auth')->group(function () {
@@ -73,4 +95,4 @@ Route::middleware('auth')->group(function () {
 });
 
 // Authentication routes
-require __DIR__.'/auth.php';
+require __DIR__ . '/auth.php';

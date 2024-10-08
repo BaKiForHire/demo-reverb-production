@@ -3,6 +3,7 @@ export interface User {
     name: string;
     email: string;
     email_verified_at?: string;
+    tiers: Tier[];
     [key: string]: any;
 }
 
@@ -85,4 +86,18 @@ export interface Auction {
     categories: Category[];
     bids: Bid[];
     favorite?: boolean;
+}
+
+export type Tier = {
+    id: number;
+    name: string;
+    description?: string; // Optional, depending on your backend model
+    status: boolean;
+};
+
+export interface DashboardProps {
+    user: User;
+    availableTiers: Tier[];
+    tierDetails: any,
+    [key: string]: any;
 }

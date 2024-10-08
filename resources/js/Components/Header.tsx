@@ -8,8 +8,10 @@ import BBBRifle from '../Icons/BBBRifle';
 import BBBShotgun from '../Icons/BBBShotgun';
 import BBBAmmo from '../Icons/BBBAmmo';
 import BBBParts from '../Icons/BBBParts';
-import { useForm, usePage } from '@inertiajs/react';
+import { Link, useForm, usePage } from '@inertiajs/react';
 import ApplicationLogo from './ApplicationLogo';
+import Dropdown from './Dropdown';
+import UserDropdown from './UserDropdown';
 
 const Header: React.FC = () => {
     const [isOpen, setIsOpen] = useState(false);
@@ -38,14 +40,14 @@ const Header: React.FC = () => {
 
             {/* Header Content */}
             <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-                <div className="flex justify-between lg:justify-center items-center py-4">
+                <div className="flex justify-between custom-md:justify-center items-center py-4">
                     {/* Logo */}
                     <div className="text-2xl">
                         <ApplicationLogo />
                     </div>
 
                     {/* Desktop Navigation */}
-                    <div className="hidden lg:block max-w-7xl">
+                    <div className="hidden custom-md:block max-w-7xl">
                         <div className="flex">
                             <nav className="flex justify-around items-center">
                                 {menuItems.map((item) => (
@@ -54,7 +56,7 @@ const Header: React.FC = () => {
                                         href="#"
                                         className="flex items-center p-3 space-x-2 hover:bg-gray-200 rounded uppercase font-bold"
                                     >
-                                        <span className="text-xl">{item.icon}</span>
+                                        <span className="text-xl hidden lg:inline">{item.icon}</span> {/* Icon shown only on screens larger than 1060px */}
                                         <span>{item.name}</span>
                                         <FaChevronDown className="ml-2" />
                                     </a>
@@ -63,7 +65,16 @@ const Header: React.FC = () => {
 
                             {/* Action Button */}
                             <div className="text-right flex gap-3 flex-col items-end self-center">
-                                <PrimaryButton style={{ background: '#78866b' }} className="bg-[#78866b] normal-case whitespace-nowrap justify-center w-full">Sign In</PrimaryButton>
+                                {user ? (
+                                    <UserDropdown user={user} />
+                                ) : (
+                                    <Link
+                                        className="inline-flex items-center px-4 py-2 border border-transparent rounded-md font-semibold text-white uppercase tracking-widest hover:bg-green-950 focus:bg-green-950 active:bg-green-950 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2 transition ease-in-out duration-150 bg-[#78866b] normal-case whitespace-nowrap justify-center w-full"
+                                        href={route('login')}
+                                    >
+                                        Sign In
+                                    </Link>
+                                )}
                             </div>
                         </div>
 
@@ -92,7 +103,7 @@ const Header: React.FC = () => {
                     </div>
 
                     {/* Mobile Menu Button */}
-                    <div className="lg:hidden">
+                    <div className="custom-md:hidden">
                         <button onClick={toggleMenu} className="focus:outline-none">
                             <svg
                                 className="w-6 h-6"
@@ -116,8 +127,7 @@ const Header: React.FC = () => {
             {/* Mobile Sidebar */}
             <div
                 className={`fixed z-10 top-0 left-0 h-full w-64 bg-[#fefefe] text-black transform ${isOpen ? 'translate-x-0' : '-translate-x-full'
-                    } transition-transform duration-300 ease-in-out lg:hidden`}
-            >
+                    } transition-transform duration-300 ease-in-out custom-md:hidden`} > {/* Only shown on screens smaller than 890px */}
                 <div className="flex justify-end p-4">
                     <button onClick={toggleMenu} className="focus:outline-none">
                         <svg
@@ -140,17 +150,14 @@ const Header: React.FC = () => {
                 {/* User Info */}
                 <div className="px-4 pt-4">
                     {user ? (
-                        <div className="flex items-center justify-center w-full">
-                            <span className="font-bold">{user.name}</span>
-                        </div>
+                        <UserDropdown user={user} />
                     ) : (
-                        <PrimaryButton 
-                        style={{ background: '#78866b' }}
-                            className="bg-[#78866b] normal-case whitespace-nowrap justify-center w-full" 
-                            onClick={() => window.location.href = '/login'}
+                        <Link
+                            className="inline-flex items-center px-4 py-2 border border-transparent rounded-md font-semibold text-white uppercase tracking-widest hover:bg-green-950 focus:bg-green-950 active:bg-green-950 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2 transition ease-in-out duration-150 bg-[#78866b] normal-case whitespace-nowrap justify-center w-full"
+                            href={route('login')}
                         >
                             Sign In
-                        </PrimaryButton>
+                        </Link>
                     )}
                 </div>
 
@@ -187,7 +194,7 @@ const Header: React.FC = () => {
                             className="flex items-center p-3 space-x-2 hover:bg-gray-200 rounded"
                         >
                             <span className="text-xl">{item.icon}</span>
-                            <span>{item.name}</span>
+                            <span className="flex-1">{item.name}</span>
                             <FaChevronDown className="ml-auto" />
                         </a>
                     ))}

@@ -17,7 +17,7 @@ return new class extends Migration
             $table->string('identifier')->unique();
             $table->foreignId('tier_id')->constrained()->onDelete('cascade');
             $table->boolean('is_active')->default(true);
-            $table->enum('data_type', ['string', 'number', 'date', 'dropdown']);
+            $table->enum('data_type', ['string', 'boolean', 'date', 'dropdown', 'file']);
             $table->text('validation_rules')->nullable();
             $table->timestamps();
         });

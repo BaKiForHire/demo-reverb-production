@@ -14,16 +14,16 @@ export default forwardRef(function TextInput(
         if (isFocused) {
             localRef.current?.focus();
         }
-    }, []);
+    }, [isFocused]);
 
     return (
         <input
             {...props}
             type={type}
             className={
-                'border-gray-300 focus:border-indigo-500 focus:ring-indigo-500 rounded-md shadow-sm ' +
+                'block w-full px-4 py-2 border rounded-lg text-gray-500 border-gray-300 focus:border-indigo-500 focus:ring-indigo-500 focus:outline-none ' +
                 className
-            } 
+            }
             ref={localRef}
         />
     );

@@ -2,10 +2,12 @@
 
 namespace App\Models;
 
+use App\Enums\AuctionStatus;
 use App\Events\AuctionGracePeriodExtended;
 use Carbon\Carbon;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Support\Facades\Auth;
 
 class Auction extends Model
 {
@@ -28,7 +30,17 @@ class Auction extends Model
         'has_shipping_proof',
         'shipping_proof_url',
         'grace_extension_count',
-        'hash'
+        'hash',
+        'can_make_offer',
+        'is_buy_now',
+        'reserve_price',
+        'buy_now_price',
+        'is_auction',
+        'reserve_price',
+    ];
+
+    protected $hidden = [
+        'id'
     ];
 
     protected $casts = [
@@ -52,6 +64,14 @@ class Auction extends Model
     public function bids()
     {
         return $this->hasMany(Bid::class);
+    }
+
+    /**
+     * Get all bids associated with the Auction from a specific user
+     */
+    public function bidsByUser()
+    {
+        return $this->hasMany(Bid::class)->where('user_id', Auth::user()->id);
     }
 
     /**
@@ -162,5 +182,31 @@ class Auction extends Model
     public function getUserAttribute()
     {
         return $this->user()->first();
+    }
+
+    /**
+     * Concludes the auction if it is active and the end time has passed.
+     *
+     * This method checks if the auction's status is 'active' and if the current time
+     * is past the auction's end time. If both conditions are met, it updates the
+     * auction's status to 'concluded' and saves the changes to the database.
+     *
+     * @return void
+     */
+    public function conclude()
+    {
+        if (AuctionStatus::isStatus($this->status, AuctionStatus::ACTIVE) && $this->end_time < now()) {
+            // Ensure the status transition is valid according to the database constraints
+            if (AuctionStatus::validStatus(AuctionStatus::ENDED)) {
+                $this->status = AuctionStatus::ENDED;
+                $this->updated_at = now();
+                $this->save();
+
+                // TODO: Add logic here to queue job for announcing the winner
+            } else {
+                // Handle invalid status transition
+                throw new \Exception('Invalid status transition.');
+            }
+        }
     }
 }

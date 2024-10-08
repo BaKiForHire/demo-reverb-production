@@ -27,8 +27,7 @@ class DatabaseSeeder extends Seeder
         $this->call([
             UserSeeder::class,
             TierSeeder::class,
-            UserTierSeeder::class,
-            UserTierKeySeeder::class,
+            UserTierKeySeeder::class, // Moved to ensure tier keys are set up after tiers are seeded
             AuctionSeeder::class,
             BidSeeder::class,
             CommentSeeder::class,
@@ -40,6 +39,7 @@ class DatabaseSeeder extends Seeder
             ShippingOptionSeeder::class,
             PaymentSeeder::class,
             PayoutRequestSeeder::class,
+            FavoriteAuctionSeeder::class,
         ]);
     }
 }

@@ -1,5 +1,6 @@
-import { PropsWithChildren } from 'react';
-import { Dialog, DialogPanel, Transition, TransitionChild } from '@headlessui/react';
+import { PropsWithChildren, Fragment } from 'react';
+import { Dialog, DialogPanel, Transition } from '@headlessui/react';
+import { BBBClose } from '@/Icons/BBBIcons';
 
 export default function Modal({
     children,
@@ -28,14 +29,14 @@ export default function Modal({
     }[maxWidth];
 
     return (
-        <Transition show={show} leave="duration-200">
+        <Transition show={show} as={Fragment} leave="duration-200">
             <Dialog
                 as="div"
                 id="modal"
-                className="fixed inset-0 flex overflow-y-auto px-4 py-6 sm:px-0 items-center z-50 transform transition-all"
+                className="fixed inset-0 flex overflow-y-auto px-4 py-6 sm:px-0 items-center justify-center z-50 transform transition-all"
                 onClose={close}
             >
-                <TransitionChild
+                <Transition.Child
                     enter="ease-out duration-300"
                     enterFrom="opacity-0"
                     enterTo="opacity-100"
@@ -44,9 +45,9 @@ export default function Modal({
                     leaveTo="opacity-0"
                 >
                     <div className="absolute inset-0 bg-gray-500/75" />
-                </TransitionChild>
+                </Transition.Child>
 
-                <TransitionChild
+                <Transition.Child
                     enter="ease-out duration-300"
                     enterFrom="opacity-0 translate-y-4 sm:translate-y-0 sm:scale-95"
                     enterTo="opacity-100 translate-y-0 sm:scale-100"
@@ -55,11 +56,21 @@ export default function Modal({
                     leaveTo="opacity-0 translate-y-4 sm:translate-y-0 sm:scale-95"
                 >
                     <DialogPanel
-                        className={`mb-6 bg-white rounded-lg overflow-hidden shadow-xl transform transition-all sm:w-full sm:mx-auto ${maxWidthClass}`}
+                        className={`relative bg-white rounded-lg shadow-xl transform transition-all sm:w-full sm:mx-auto ${maxWidthClass} p-6`}
                     >
+                        {/* Close Icon */}
+                        <button
+                            type="button"
+                            onClick={close}
+                            className="absolute top-3 right-3 text-black hover:text-gray-700 focus:outline-none"
+                        >
+                            <BBBClose className="h-6 w-6" aria-hidden="true" />
+                        </button>
+
+                        {/* Modal Content */}
                         {children}
                     </DialogPanel>
-                </TransitionChild>
+                </Transition.Child>
             </Dialog>
         </Transition>
     );

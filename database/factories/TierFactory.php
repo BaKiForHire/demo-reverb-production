@@ -24,4 +24,15 @@ class TierFactory extends Factory
             'description' => $this->faker->sentence,
         ];
     }
+
+    /**
+     * Predefined tiers for seeding.
+     */
+    public function predefined(string $name, string $description)
+    {
+        return $this->state([
+            'name' => $name,
+            'description' => $description,
+        ]);
+    }
 }
